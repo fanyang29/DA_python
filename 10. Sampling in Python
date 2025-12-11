@@ -1,0 +1,146 @@
+################################
+#############1.introduction to sampling 
+#1. sampling and point estimate use .sample()
+book= book.sample(n=10)
+book1= book["name"].sample(n=10)
+
+#population parameters & point estimates
+book_sample_mean= book["price"].mean()
+
+coffee_ratings["total_cup_points"].hist(bins=np.arange(59,93,2))  # the stop value is exclusive  so the range is actually 59,91, but we need to make it 93
+
+# pseudo-random number generation
+seed=1
+calc_next_random(seed)
+
+np.random.beta()
+np.random.binomial()
+np.random.chisquare()
+
+ # set a random seed
+np.random.seed(1)
+np.random.normal(loc=2, scale=1.5, size=2)   #loc: mean, sclae: std size: how many random numebrs will be returned
+
+
+
+
+
+#######################
+##### 2.Sampling methods
+#1.simple random and systematic sampling
+# simple random sampling with pandas
+book.sample(n=5, random_state=123456)   # random_state is seed
+
+# systematic sampling. defining the interval,determining how big the interval between each row should be for a given sample size.
+sample_size=5
+pop_size=len(coffee_ratings)
+print(pop_size)
+interval= pop_size//sample_size
+print(interval)  #select every 267 row
+
+coffee_rating.iloc[::interval]   ## To select every two hundred and sixty-seventh row, we call dot-iloc on coffee_ratings and pass double-colons and the interval, which is 267 in this case. Double-colon interval tells pandas to select every two hundred and sixty-seventh row from zero to the end of the DataFrame
+
+# the trouble with systematic sampling:
+#Suppose we are interested in statistics about the aftertaste attribute of the coffees. To examine this, first, we use reset_index to create a column of index values in our DataFrame that we can plot. Plotting aftertaste against index shows a pattern. Earlier rows generally have higher aftertaste scores than later rows. This introduces bias into the statistics that we calculate. In general, it is only safe to use systematic sampling if a plot like this has no pattern; that is, it just looks like noise.
+coffee_ratings_with_id=coffee_ratins.reset_index()   #create a column of index values
+coffee_ratings_with_id.plot(x="index", y="aftertaste", kind="scatter")
+plt.show()  #we can only use systamtic sampling if we see the plot is random like noise, if there's pattern (e.g. higher index with higher aftertaste) we can not use sysSamp
+
+#To To ensure that systematic sampling is safe, we can randomize the row order before sampling. 
+shuffled=coffee_ratings.sample(frac=1)   #randomly 
+shuffled= shuffled.reset_index(drop=True).reset_index()
+shuffled.plot(x="index", y="aftertaste", kind="scatter")
+
+#2. Stratified and weighted random sampling
+top_counted_countries=["Mexico","Columbia","Taiwan"]
+top_counted_subset=coffee_ratings["country_of_origin"].isin(top_counted_countries)   #filter the population and only return the rows corresponding to the selected countries
+coffee_ratings_top=coffee_ratings[top_counted_subset]
+coffee_ratings_sample=coffee_ratings_top.sample(frac=0.1, random_state=2021) # take a ten percent simple random sample of the dataset using .sample with frac =0.1
+coffee_ratings_sample["country_of_origin"].value_counts(normalize=True) #look at the counts for each country (proportion)
+  
+   #Proportional stratified sampling
+coffee_ratings_strat= coffee_rating_top.groupby("country_of_origin")\
+              .sample(frac=0.1, random_state=2021)    #\ is to break long sentence
+
+coffee_ratings_strat["country_of_origin"].value_counts(normalize=True)  # now the porportion is much more closer to those in the population
+
+  # sample equal counts from each group
+coffee_ratings_eq= coffee_ratings_top.groupby("country_of_origin")\
+                  .sample(n=15, random_state=2021)
+
+
+# Weighted random sampling
+ #provides even more flexibility;specify weights to adjust the relative probability of a row being sampled
+ #suppose we thing it was important to have a higher porpotion of Taiwanese coffees in the sample than in the populatin
+import numpy as np
+coffee_ratings_weights= coffee_ratings_top
+condition=coffee_ratings_weight["country of origin"] =="Taiwan"
+coffee_ratings_weight["weight"]=np.where(condition,2,1)  #This means when each row is randomly sampled, Taiwanese coffees have two times the chance of being picked compared to other coffees.
+coffee_ratings_weight= coffee_ratings_weight.sample(frac=0.1, weights="weight")
+  #plot hist with bins of width 1 from 0 to 40
+attrition_pop['YearsAtCompany'].hist(bins=np.arange(0, 41, 1))
+
+# Sample 400 employees weighted by YearsAtCompany
+attrition_weight = attrition_pop.sample(n=400, weights="YearsAtCompany")
+
+
+# 3. CLuster sampling
+ #The stratified sampling approach was to 
+   #a. split the population into subgroups, 
+   #b. then use simple random sampling on each of them.   Cluster sampling means that we limit the number of subgroups in the analysis by picking a few of them with simple random sampling. We then perform simple random sampling on each subgroup as before.
+
+ # first, list all unique subgroups
+varieties_pop=list(coffee_ratings["variety"].unique())
+import random
+varieties_samp= random.sample(varieties_pop, k=3)
+ #second, sampling each group
+variety_condition=coffee_ratings["variety"].isin(varieties_samp)
+coffee_ratings_cluster=coffee_ratings[variety_condition]  #Filter for rows where variety is in varieties_samp
+
+# To ensure that the isin filtering removes levels with zero rows, we apply the cat-dot-remove_unused_categories method on the Series of focus, which is variety here.
+coffee_ratings_cluster["variety"]=coffee_ratings_cluster["variety"].cat.remove_unused_categories()
+
+coffee_ratings_sample= coffee_ratings_cluster["variety"].sample(n=15)
+  #or
+# Perform cluster sampling on the selected group, getting 0.25 of attrition_pop
+attrition_clust = attrition_clust_prep.groupby("RelationshipSatisfaction")\
+    .sample(n=len(attrition_pop) // 4, random_state=2022)
+# We can also do multistage sampling: random clusters and random pick 
+
+# 4. Comparing different sampling 
+   
+ #Simple: Mean Attrition by RelationshipSatisfaction group
+mean_attrition_pop = attrition_pop.groupby("RelationshipSatisfaction")["Attrition"].mean()
+
+# Print the result
+print(mean_attrition_pop)
+
+
+################################
+#############3.Sampling distribution
+
+# 1. Relative error of point estimates 
+ # how sample size affect accuracy of point estimates
+len(coffee_ratings.sample(300))
+
+#Relative errors
+# Population parameter:
+population_mean=coffee_ratings["total_cup_points"].mean()
+#point estimate
+sample_mean=coffee_ratings.sample(n=sample_size)["total_cup_points"].mean()
+# relative error: the absolute difference between the two numbers
+rel_error_pct=100*abs(population_mean-sample_mean)/population_mean
+
+# 2. Creating a sampling distribution
+  # for loop
+
+mean_cup_points_1000=[]   #We start by creating an empty list to store the means. 
+for i in range(1000):
+    mean_cup_points_1000.append(
+        coffee_ratings.sample(n=30)["total_cup_points"].mean()
+    )
+print(mean_cup_points_1000)
+plt.hist(mean_cup_points_1000, bins=30)
+#A distribution of replicates of sample means, or other point estimates, is known as a sampling distribution.
+
+# 3. approximate sampling distributions
