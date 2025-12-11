@@ -194,3 +194,63 @@ coffee_ratings['total_cup_points'].std(ddof=0)     #ddof=0: population std, ddof
 # standard error: standard deviation of the sampling distribution
 #The standard deviation of the sampling distribution is approximately equal to the population standard deviation divided by the square root of the sample size. 
 
+
+
+###############4 Bootstrap Distributions ###################
+
+  #1. Introduction to bootstrapping
+
+coffee_focus=coffee_ratings[["variety","country", "flavor"]]
+coffee_focus=coffee_focus.reset_index()
+
+ # resampling with.sample()
+coffee_resamp=coffee_focus.sample(frac=1, replace=True)
+coffee_resamp["index"].value_counts()  #shows how many times each coffee ended up in the resampled dataset
+
+num_unique_coffees= len(coffee_resamp.drop_duplicates(subset="index"))   # see the unique coffees were included
+
+len(coffee_ratings)- num_unique_coffees
+
+# With sampling, we treat the dataset as the population and move to a smaller sample. With bootstrapping, we treat the dataset as a sample and use it to build up a theoretical population. A use case of bootstrapping is to try to understand the variability due to sampling. This is important in cases where we aren't able to sample the population multiple times to create a sampling distribution.
+
+# Process
+  #1. randomly sample with replacement to get a resample the same size as the original dataset. 
+  #2. Then, calculate a statistic, such as a mean of one of the columns. 
+  #3. repeat steps 1 and 2
+
+import numpy as np
+mean_flavor_1000=[]
+for i in range(1000):
+    mean_flavor_1000.append(
+        coffee_sample.sample(frac=1, replace=True)['flavor'].mean())
+    )
+plt.hist(mean_flavor_1000)
+#Radical replacement reasoning! The key to deciding whether to sample without or with replacement is whether or not your dataset is best thought of as being the whole population or not.
+
+
+# 2. Comparing sampling and bootstrap distributions
+#l. The bootstrap distribution mean is usually almost identical to the original sample mean. However, that is not often a good thing. If the original sample wasn't closely representative of the population, then the bootstrap distribution mean won't be a good estimate of the population mean. Bootstrapping cannot correct any potential biases due to differences between the sample and the population.
+
+ # Although bootstrapping was poor at calculating the populaiton mean, The estimated standard error times the square root of the sample size gives a really good estimate of the standard deviation of the population. 
+
+
+
+# Confidence interval
+#CI: "values within one standard deviation of the mean", which gives a good sense of where most of the values in a distribution lie. 
+# CI account for uncertainty in our estimate of a population parameter by providing a range of possible values. We are confident that the true value lies somewhere in the interval specified by that range.
+ 
+ # quantile method for CI
+np.quantile(coffee_bot_distn, 0.025)
+np.quantile(coffee_bot_distn, 0.975)
+
+# inverse cumulative distribution fucntion
+# PDF: bell curve we've seen before is the probability density function or PDF. 
+# CDF:  Using calculus, if we integrate this, we get the cumulative distribution function or CDF. 
+# inverse CDF: If we flip the x and y axes, we get the inverse CDF. 
+from scipy.stats import norm
+norm.ppf(quantile, loc=0, scale=1)
+
+point_estimate=np.mean(coffee_bot_distn)
+std_error=np.std(coffee_bot_distn, ddof=1)
+lower= norm.ppf(0.025, loc=point_estimate, scale= std_error)
+upper= norm.ppf(0.975, loc=point_estimate, scale= std_error)
