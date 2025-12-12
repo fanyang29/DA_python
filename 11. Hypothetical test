@@ -1,0 +1,52 @@
+###################################
+#########1. Hypothesis tests and z-scores
+  #1. generating a bootstrap distribution
+import numpy as np
+# Step3. Repeat steps1&2 many times, appending to a list
+so_boot_distn=[]
+for i in range(5000):
+  so_boot_distn.append(
+  #Step 2. Calcualte point estimate
+   np.mean(
+      # Step 1. Resample
+stack_overflow.sample(frac=1, replace=True)['converted_temp']
+   )
+)
+
+
+# get Std
+std_error=np.std(so_boot_distn, ddof=1)
+ #z score = (sample stat - mean)/std
+
+
+# Calculate the proportion of late shipments
+late_prop_samp = (late_shipments['late']=="Yes").mean()
+
+
+#calculate p-value
+# left-tail test-> norm.cdf() , right-tail test 1-norm.cdf()
+
+from scipy.stats import norm
+1-norm.cdf(z_score, loc=0, scale=1)
+
+
+
+####################################
+###########2. performing t-tests
+ # 1. calculate groupwise summary statistics
+stack_over.groupby("age")["coverted_comp"].mean()
+stack_over.groupby("age")["coverted_comp"].std()
+stack_over.groupby("age")["coverted_comp"].count()
+# t=((x1mean -x2mean)-(miu1-miu2))/ SE(x1-x2)
+# SE(x1samplemean -x2sample mean)= sqrt(s1^2/n1 + s2^2/n2) 
+
+# Z-statistic: needed when using one sample statistic to estimate a population parameter
+# t-statistic: needed when using multiple sample statistics to estimate a population parameter
+
+degree_of_freedom= n1+n2-2
+
+1-t.cdf(d_stat, df=degree_of_freedom)
+
+
+2. # ttest
+pingouin.ttest(x=sample_data["rep_08"], y=sample_data["rep_12"], paired=False, alternative="less")
