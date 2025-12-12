@@ -1,2 +1,2 @@
 # DA_python
-Project exercise from Datacamp
+Projects from Datacamp
